@@ -1,0 +1,346 @@
+{
+  "street": "WACHUSETT ST",
+  "scraped_at": "2025-12-16T18:20:00.000000",
+  "total_properties_found": 47,
+  "properties_scraped": 5,
+  "properties": [
+    {
+      "parcel_id": "25-012-00045",
+      "address": "15 WACHUSETT ST",
+      "location": "15 WACHUSETT ST, WORCESTER, MA 01609",
+      "url": "https://gis.vgsi.com/worcesterma/Parcel.aspx?pid=25-012-00045",
+      "scraped_at": "2025-12-16T18:20:05.000000",
+      "owner": "SMITH, JOHN A & MARY B",
+      "co_owner": null,
+      "mailing_address": "15 WACHUSETT ST\nWORCESTER, MA 01609",
+      "details": {
+        "Property Type": "Residential",
+        "Land Use": "101 - Single Family",
+        "Zoning": "RS-7",
+        "Neighborhood": "25 - College Hill",
+        "Year Built": "1925",
+        "Living Area": "1,856",
+        "Total Rooms": "7",
+        "Bedrooms": "3",
+        "Full Baths": "1",
+        "Half Baths": "1",
+        "Stories": "2",
+        "Style": "Colonial",
+        "Exterior Wall": "Wood Clapboard",
+        "Roof Type": "Gable",
+        "Roof Material": "Asphalt Shingle",
+        "Foundation": "Concrete Block",
+        "Basement": "Full",
+        "Heating Type": "Forced Hot Water",
+        "Heating Fuel": "Gas",
+        "AC Type": "None",
+        "Fireplaces": "1",
+        "Garage Type": "Detached",
+        "Garage Capacity": "1",
+        "Lot Size (Acres)": "0.15",
+        "Lot Size (SF)": "6,534",
+        "Frontage": "50",
+        "Depth": "130",
+        "Land Value": "$98,400",
+        "Building Value": "$201,600",
+        "Total Value": "$300,000",
+        "Prior Year Value": "$285,000",
+        "Condition": "Average",
+        "Grade": "C"
+      },
+      "sales_history": [
+        {
+          "date": "06/15/2018",
+          "price": "$275,000",
+          "book_page": "58234/125",
+          "sale_type": "Valid Sale"
+        },
+        {
+          "date": "03/22/2005",
+          "price": "$189,000",
+          "book_page": "36521/089",
+          "sale_type": "Valid Sale"
+        }
+      ],
+      "photos": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00045&type=photo&idx=0",
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00045&type=photo&idx=1"
+      ],
+      "layouts": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00045&type=sketch"
+      ]
+    },
+    {
+      "parcel_id": "25-012-00046",
+      "address": "17 WACHUSETT ST",
+      "location": "17 WACHUSETT ST, WORCESTER, MA 01609",
+      "url": "https://gis.vgsi.com/worcesterma/Parcel.aspx?pid=25-012-00046",
+      "scraped_at": "2025-12-16T18:20:12.000000",
+      "owner": "JOHNSON, ROBERT T",
+      "co_owner": "JOHNSON, LISA M",
+      "mailing_address": "17 WACHUSETT ST\nWORCESTER, MA 01609",
+      "details": {
+        "Property Type": "Residential",
+        "Land Use": "101 - Single Family",
+        "Zoning": "RS-7",
+        "Neighborhood": "25 - College Hill",
+        "Year Built": "1920",
+        "Living Area": "2,134",
+        "Total Rooms": "8",
+        "Bedrooms": "4",
+        "Full Baths": "2",
+        "Half Baths": "0",
+        "Stories": "2",
+        "Style": "Cape Cod",
+        "Exterior Wall": "Vinyl Siding",
+        "Roof Type": "Gable",
+        "Roof Material": "Asphalt Shingle",
+        "Foundation": "Poured Concrete",
+        "Basement": "Full",
+        "Heating Type": "Forced Hot Air",
+        "Heating Fuel": "Oil",
+        "AC Type": "Central",
+        "Fireplaces": "0",
+        "Garage Type": "Attached",
+        "Garage Capacity": "2",
+        "Lot Size (Acres)": "0.18",
+        "Lot Size (SF)": "7,841",
+        "Frontage": "55",
+        "Depth": "142",
+        "Land Value": "$105,200",
+        "Building Value": "$244,800",
+        "Total Value": "$350,000",
+        "Prior Year Value": "$332,500",
+        "Condition": "Good",
+        "Grade": "B"
+      },
+      "sales_history": [
+        {
+          "date": "09/30/2020",
+          "price": "$325,000",
+          "book_page": "62145/234",
+          "sale_type": "Valid Sale"
+        }
+      ],
+      "photos": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00046&type=photo&idx=0"
+      ],
+      "layouts": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00046&type=sketch"
+      ]
+    },
+    {
+      "parcel_id": "25-012-00047",
+      "address": "21 WACHUSETT ST",
+      "location": "21 WACHUSETT ST, WORCESTER, MA 01609",
+      "url": "https://gis.vgsi.com/worcesterma/Parcel.aspx?pid=25-012-00047",
+      "scraped_at": "2025-12-16T18:20:19.000000",
+      "owner": "CHEN, MICHAEL W",
+      "co_owner": null,
+      "mailing_address": "PO BOX 1234\nBOSTON, MA 02101",
+      "details": {
+        "Property Type": "Residential",
+        "Land Use": "104 - Two Family",
+        "Zoning": "RS-7",
+        "Neighborhood": "25 - College Hill",
+        "Year Built": "1915",
+        "Living Area": "2,890",
+        "Total Rooms": "12",
+        "Bedrooms": "6",
+        "Full Baths": "2",
+        "Half Baths": "0",
+        "Stories": "2.5",
+        "Style": "Two Family",
+        "Exterior Wall": "Aluminum Siding",
+        "Roof Type": "Gable",
+        "Roof Material": "Asphalt Shingle",
+        "Foundation": "Stone",
+        "Basement": "Partial",
+        "Heating Type": "Hot Water Baseboard",
+        "Heating Fuel": "Gas",
+        "AC Type": "None",
+        "Fireplaces": "0",
+        "Garage Type": "None",
+        "Garage Capacity": "0",
+        "Lot Size (Acres)": "0.12",
+        "Lot Size (SF)": "5,227",
+        "Frontage": "45",
+        "Depth": "116",
+        "Land Value": "$85,600",
+        "Building Value": "$289,400",
+        "Total Value": "$375,000",
+        "Prior Year Value": "$356,200",
+        "Condition": "Average",
+        "Grade": "C+"
+      },
+      "sales_history": [
+        {
+          "date": "11/15/2019",
+          "price": "$340,000",
+          "book_page": "60892/178",
+          "sale_type": "Valid Sale"
+        },
+        {
+          "date": "08/05/2010",
+          "price": "$195,000",
+          "book_page": "45678/092",
+          "sale_type": "Valid Sale"
+        },
+        {
+          "date": "04/12/1998",
+          "price": "$89,000",
+          "book_page": "22145/056",
+          "sale_type": "Valid Sale"
+        }
+      ],
+      "photos": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00047&type=photo&idx=0",
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00047&type=photo&idx=1",
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00047&type=photo&idx=2"
+      ],
+      "layouts": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00047&type=sketch"
+      ]
+    },
+    {
+      "parcel_id": "25-012-00048",
+      "address": "25 WACHUSETT ST",
+      "location": "25 WACHUSETT ST, WORCESTER, MA 01609",
+      "url": "https://gis.vgsi.com/worcesterma/Parcel.aspx?pid=25-012-00048",
+      "scraped_at": "2025-12-16T18:20:26.000000",
+      "owner": "WORCESTER HOUSING TRUST",
+      "co_owner": null,
+      "mailing_address": "100 FRONT ST STE 401\nWORCESTER, MA 01608",
+      "details": {
+        "Property Type": "Residential",
+        "Land Use": "105 - Three Family",
+        "Zoning": "RS-7",
+        "Neighborhood": "25 - College Hill",
+        "Year Built": "1910",
+        "Living Area": "3,456",
+        "Total Rooms": "15",
+        "Bedrooms": "8",
+        "Full Baths": "3",
+        "Half Baths": "0",
+        "Stories": "3",
+        "Style": "Three Family",
+        "Exterior Wall": "Wood Shingle",
+        "Roof Type": "Flat",
+        "Roof Material": "Rubber Membrane",
+        "Foundation": "Brick",
+        "Basement": "Full",
+        "Heating Type": "Steam",
+        "Heating Fuel": "Gas",
+        "AC Type": "None",
+        "Fireplaces": "0",
+        "Garage Type": "None",
+        "Garage Capacity": "0",
+        "Lot Size (Acres)": "0.10",
+        "Lot Size (SF)": "4,356",
+        "Frontage": "40",
+        "Depth": "109",
+        "Land Value": "$78,200",
+        "Building Value": "$346,800",
+        "Total Value": "$425,000",
+        "Prior Year Value": "$403,700",
+        "Condition": "Fair",
+        "Grade": "C"
+      },
+      "sales_history": [
+        {
+          "date": "02/28/2022",
+          "price": "$395,000",
+          "book_page": "65234/321",
+          "sale_type": "Valid Sale"
+        }
+      ],
+      "photos": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00048&type=photo&idx=0"
+      ],
+      "layouts": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00048&type=sketch"
+      ]
+    },
+    {
+      "parcel_id": "25-012-00049",
+      "address": "29 WACHUSETT ST",
+      "location": "29 WACHUSETT ST, WORCESTER, MA 01609",
+      "url": "https://gis.vgsi.com/worcesterma/Parcel.aspx?pid=25-012-00049",
+      "scraped_at": "2025-12-16T18:20:33.000000",
+      "owner": "GARCIA, MARIA E",
+      "co_owner": "GARCIA, CARLOS R",
+      "mailing_address": "29 WACHUSETT ST\nWORCESTER, MA 01609",
+      "details": {
+        "Property Type": "Residential",
+        "Land Use": "101 - Single Family",
+        "Zoning": "RS-7",
+        "Neighborhood": "25 - College Hill",
+        "Year Built": "1935",
+        "Living Area": "1,654",
+        "Total Rooms": "6",
+        "Bedrooms": "3",
+        "Full Baths": "1",
+        "Half Baths": "1",
+        "Stories": "1.5",
+        "Style": "Bungalow",
+        "Exterior Wall": "Brick",
+        "Roof Type": "Hip",
+        "Roof Material": "Asphalt Shingle",
+        "Foundation": "Poured Concrete",
+        "Basement": "Full",
+        "Heating Type": "Forced Hot Air",
+        "Heating Fuel": "Gas",
+        "AC Type": "Window Unit",
+        "Fireplaces": "1",
+        "Garage Type": "Detached",
+        "Garage Capacity": "1",
+        "Lot Size (Acres)": "0.14",
+        "Lot Size (SF)": "6,098",
+        "Frontage": "48",
+        "Depth": "127",
+        "Land Value": "$92,100",
+        "Building Value": "$182,900",
+        "Total Value": "$275,000",
+        "Prior Year Value": "$261,200",
+        "Condition": "Good",
+        "Grade": "B-"
+      },
+      "sales_history": [
+        {
+          "date": "07/20/2017",
+          "price": "$245,000",
+          "book_page": "56789/145",
+          "sale_type": "Valid Sale"
+        },
+        {
+          "date": "05/10/2003",
+          "price": "$165,000",
+          "book_page": "32456/078",
+          "sale_type": "Valid Sale"
+        }
+      ],
+      "photos": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00049&type=photo&idx=0",
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00049&type=photo&idx=1"
+      ],
+      "layouts": [
+        "https://gis.vgsi.com/worcesterma/GetImage.ashx?pid=25-012-00049&type=sketch"
+      ]
+    }
+  ],
+  "all_property_pids": [
+    "25-012-00045",
+    "25-012-00046",
+    "25-012-00047",
+    "25-012-00048",
+    "25-012-00049",
+    "25-012-00050",
+    "25-012-00051",
+    "25-012-00052"
+  ],
+  "metadata": {
+    "source": "https://gis.vgsi.com/worcesterma/Streets.aspx",
+    "scraper_version": "1.0.0",
+    "note": "Sample output showing typical VGSI property data structure"
+  }
+}
