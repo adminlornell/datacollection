@@ -2,6 +2,9 @@
 Scraper for extracting all street names from the Worcester MA GIS site.
 """
 import asyncio
+import aiohttp
+import ssl
+from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import List, Dict
 from urllib.parse import urljoin
@@ -13,10 +16,7 @@ from ..models import Street, ScrapingProgress
 
 class StreetScraper(BaseScraper):
     """
-    Scrapes all street names from the Streets.aspx page.
-
-    The VGSI Streets.aspx page typically displays streets in an alphabetical
-    list with links to view properties on each street.
+    Scrapes all street names from the Streets.aspx page using HTTP requests (faster/reliable).
     """
 
     async def scrape_all_streets(self) -> List[Dict]:
@@ -26,145 +26,37 @@ class StreetScraper(BaseScraper):
         Returns:
             List of dictionaries containing street name and URL
         """
-        self.logger.info("Starting street scraping...")
-
-        # Navigate to streets page
-        await self.navigate(STREETS_URL)
-
-        # Check for alphabetical navigation (A-Z links)
-        has_alpha_nav = await self._check_alphabetical_navigation()
+        self.logger.info("Starting street scraping (HTTP mode)...")
 
         streets = []
-        if has_alpha_nav:
-            streets = await self._scrape_alphabetically()
-        else:
-            streets = await self._scrape_single_page()
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
 
-        self.logger.info(f"Found {len(streets)} streets")
-        return streets
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context)) as session:
+            # Scrape alphabetically A-Z
+            letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            for letter in letters:
+                self.logger.info(f"Scraping streets starting with '{letter}'...")
 
-    async def _check_alphabetical_navigation(self) -> bool:
-        """Check if the page has A-Z alphabetical navigation."""
-        # Look for common alphabetical navigation patterns
-        alpha_selectors = [
-            "a[href*='letter=']",
-            ".alpha-nav a",
-            "#alphaNav a",
-            "a.letter-link"
-        ]
+                # Try Letter=X pattern which was confirmed to work
+                url = f"{STREETS_URL}?Letter={letter}"
 
-        for selector in alpha_selectors:
-            elements = await self.get_all_elements(selector)
-            if len(elements) > 5:  # At least some letters present
-                return True
-
-        return False
-
-    async def _scrape_alphabetically(self) -> List[Dict]:
-        """Scrape streets by navigating through A-Z pages."""
-        streets = []
-        letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
-        for letter in letters:
-            self.logger.info(f"Scraping streets starting with '{letter}'...")
-
-            # Try different URL patterns for alphabetical navigation
-            letter_urls = [
-                f"{STREETS_URL}?letter={letter}",
-                f"{STREETS_URL}?Letter={letter}",
-                f"{STREETS_URL}?alpha={letter}",
-            ]
-
-            for url in letter_urls:
                 try:
-                    await self.navigate(url)
-                    page_streets = await self._extract_streets_from_page()
-                    if page_streets:
-                        streets.extend(page_streets)
-                        break
+                    async with session.get(url, timeout=30) as response:
+                        if response.status == 200:
+                            html = await response.text()
+                            page_streets = self._parse_streets_from_html(html)
+                            streets.extend(page_streets)
+                            self.logger.debug(f"Found {len(page_streets)} streets for letter {letter}")
+                        else:
+                            self.logger.warning(f"Failed to fetch {url}: {response.status}")
                 except Exception as e:
-                    self.logger.debug(f"Letter URL pattern failed: {url} - {e}")
-                    continue
+                    self.logger.error(f"Error scraping letter {letter}: {e}")
 
-            await self.delay(0.5)  # Brief delay between letters
+                await asyncio.sleep(0.5)  # Be respectful
 
-        return streets
-
-    async def _scrape_single_page(self) -> List[Dict]:
-        """Scrape all streets from a single page (or paginated pages)."""
-        streets = []
-
-        # First, get streets from current page
-        page_streets = await self._extract_streets_from_page()
-        streets.extend(page_streets)
-
-        # Check for pagination
-        page_num = 2
-        while True:
-            has_next = await self._go_to_next_page(page_num)
-            if not has_next:
-                break
-
-            page_streets = await self._extract_streets_from_page()
-            if not page_streets:
-                break
-
-            streets.extend(page_streets)
-            page_num += 1
-            self.logger.info(f"Scraped page {page_num - 1}, total streets: {len(streets)}")
-
-        return streets
-
-    async def _extract_streets_from_page(self) -> List[Dict]:
-        """Extract street links from the current page."""
-        streets = []
-
-        # Common selectors for street links on VGSI sites
-        street_selectors = [
-            # Table-based layouts
-            "table a[href*='Street']",
-            "table a[href*='street']",
-            "table.grid a",
-            "#ctl00_MainContent_grdStreets a",
-            "#MainContent_grdStreets a",
-            ".street-list a",
-            # List-based layouts
-            "ul.streets a",
-            ".street-item a",
-            # Generic data grid
-            "[id*='Street'] a",
-            "[id*='grid'] a[href]",
-            # ASP.NET GridView patterns
-            "tr td a[href*='aspx']",
-        ]
-
-        for selector in street_selectors:
-            elements = await self.get_all_elements(selector)
-            if elements:
-                self.logger.debug(f"Found {len(elements)} elements with selector: {selector}")
-
-                for element in elements:
-                    try:
-                        name = await element.text_content()
-                        href = await element.get_attribute('href')
-
-                        if name and href:
-                            name = name.strip()
-                            # Filter out non-street links
-                            if self._is_valid_street_name(name):
-                                full_url = urljoin(BASE_URL + "/", href)
-                                streets.append({
-                                    'name': name,
-                                    'url': full_url
-                                })
-                    except Exception as e:
-                        self.logger.debug(f"Error extracting street: {e}")
-                        continue
-
-                if streets:
-                    break  # Found streets with this selector
-
-        # Deduplicate by street name
+        # Deduplicate
         seen = set()
         unique_streets = []
         for street in streets:
@@ -172,7 +64,33 @@ class StreetScraper(BaseScraper):
                 seen.add(street['name'])
                 unique_streets.append(street)
 
+        self.logger.info(f"Found {len(unique_streets)} unique streets total")
         return unique_streets
+
+    def _parse_streets_from_html(self, html: str) -> List[Dict]:
+        """Parse street links from HTML content."""
+        streets = []
+        soup = BeautifulSoup(html, 'lxml')
+
+        # Look for links that contain 'Results.aspx' or 'Street=' or 'Streets.aspx?Name='
+        # This matches what we found working in the scrape_wachusett_http.py script
+        for link in soup.find_all('a'):
+            href = link.get('href', '')
+            text = link.get_text(strip=True)
+
+            if not href or not text:
+                continue
+
+            if 'Results.aspx' in href or 'Street=' in href or 'Name=' in href:
+                # Check if it looks like a valid street name
+                if self._is_valid_street_name(text):
+                    full_url = urljoin(BASE_URL + "/", href)
+                    streets.append({
+                        'name': text,
+                        'url': full_url
+                    })
+
+        return streets
 
     def _is_valid_street_name(self, name: str) -> bool:
         """Check if a string looks like a valid street name."""
@@ -183,7 +101,7 @@ class StreetScraper(BaseScraper):
         exclude_patterns = [
             'next', 'previous', 'page', 'back', 'home', 'search',
             'login', 'help', 'contact', 'about', '...', '«', '»',
-            'first', 'last'
+            'first', 'last', 'map', 'parcel'
         ]
 
         name_lower = name.lower()
@@ -196,32 +114,6 @@ class StreetScraper(BaseScraper):
             return False
 
         return True
-
-    async def _go_to_next_page(self, page_num: int) -> bool:
-        """Try to navigate to the next page of results."""
-        # Common pagination patterns
-        next_selectors = [
-            f"a[href*='page={page_num}']",
-            f"a[href*='Page={page_num}']",
-            f"a:text('{page_num}')",
-            "a:text('Next')",
-            "a:text('>')",
-            ".pagination a.next",
-            "#next-page",
-        ]
-
-        for selector in next_selectors:
-            try:
-                element = await self.page.query_selector(selector)
-                if element:
-                    await element.click()
-                    await self.page.wait_for_load_state('networkidle')
-                    await self.delay()
-                    return True
-            except Exception:
-                continue
-
-        return False
 
     async def save_streets_to_db(self, streets: List[Dict]) -> int:
         """Save scraped streets to database."""

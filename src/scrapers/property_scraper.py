@@ -2,6 +2,7 @@
 Scraper for extracting property listings from each street page.
 """
 import asyncio
+import re
 from datetime import datetime
 from typing import List, Dict, Optional
 from urllib.parse import urljoin, parse_qs, urlparse
@@ -210,6 +211,12 @@ class PropertyScraper(BaseScraper):
                 if param_name in params:
                     return params[param_name][0]
 
+            # Fallback for paths like /Parcel.aspx?pid=123
+            if 'pid=' in url.lower():
+                match = re.search(r'pid=(\d+)', url, re.IGNORECASE)
+                if match:
+                    return match.group(1)
+
             return None
         except Exception:
             return None
@@ -264,6 +271,12 @@ class PropertyScraper(BaseScraper):
                 )
                 self.db_session.add(property_obj)
                 saved_count += 1
+            else:
+                # Update existing
+                if prop_data.get('address'):
+                    existing.address = prop_data.get('address')
+                if prop_data.get('owner_name'):
+                    existing.owner_name = prop_data.get('owner_name')
 
         # Update street metadata
         street.property_count = len(properties)
