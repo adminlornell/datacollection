@@ -1,0 +1,17 @@
+# Browser automation
+playwright==1.40.0
+
+# Data handling
+sqlalchemy==2.0.23
+aiosqlite==0.19.0
+
+# HTTP requests (for photo downloads)
+aiohttp==3.9.1
+aiofiles==23.2.1
+
+# Utilities
+tqdm==4.66.1
+python-dotenv==1.0.0
+
+# Data export
+pandas==2.1.4
