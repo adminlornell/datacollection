@@ -1,0 +1,174 @@
+{
+  "street": "WACHUSETT ST",
+  "scraped_at": "2025-12-16T18:30:00.000000",
+  "total_properties_found": 47,
+  "properties_scraped": 1,
+  "properties": [
+    {
+      "pid": "807",
+      "location": "15 WACHUSETT ST",
+      "mblu": "02/  035/  00073/  /",
+      "acct_number": "02-035-00073",
+      "building_count": 1,
+      "url": "https://gis.vgsi.com/worcesterma/Parcel.aspx?pid=807",
+      "scraped_at": "2025-12-16T18:30:05.000000",
+
+      "owner": {
+        "name": "ARRES 359 SHIRLEY STREET LLC",
+        "co_owner": null,
+        "mailing_address": "211 PAULINE ST\nWINTHROP, MA 02152"
+      },
+
+      "current_sale": {
+        "price": "$730,000",
+        "date": "12/19/2024",
+        "book_page": "71438/0136",
+        "certificate": null,
+        "instrument": "00"
+      },
+
+      "assessment": {
+        "valuation_year": 2026,
+        "improvements": "$555,000",
+        "land": "$61,500",
+        "total": "$616,500"
+      },
+
+      "building": {
+        "year_built": 1880,
+        "living_area_sqft": 3227,
+        "replacement_cost": "$711,547",
+        "percent_good": 78,
+        "rcnld": "$555,000",
+
+        "attributes": {
+          "style": "Three Fam Conversion",
+          "model": "Three Family",
+          "grade": "Avg To Good",
+          "stories": 2.75,
+          "occupancy": 3,
+          "exterior_wall_1": "Aluminum/Vinyl",
+          "exterior_wall_2": null,
+          "roof_structure": "Gable",
+          "roof_cover": "Asphalt",
+          "interior_wall_1": "Plasters",
+          "interior_wall_2": "Dry Wall",
+          "interior_floor_1": "Hardwood",
+          "interior_floor_2": "Vinyl Tile",
+          "heat_fuel": "Gas",
+          "heat_type": "Forced Air",
+          "ac_type": "None",
+          "total_bedrooms": 8,
+          "total_full_baths": 3,
+          "total_half_baths": 0,
+          "total_xtra_fixtures": 0,
+          "total_rooms": 14,
+          "base_area": 1115,
+          "foundation_type": "Brick",
+          "basement_type": "Full",
+          "total_kitchens": 3,
+          "half_bath_grade": null
+        },
+
+        "sub_areas": [
+          {"code": "BAS", "description": "First Floor", "gross_area": 1178, "living_area": 1178},
+          {"code": "FUS", "description": "Upper Story, Finished", "gross_area": 1178, "living_area": 1178},
+          {"code": "FU3", "description": "Upper, 3/4 Finished", "gross_area": 1161, "living_area": 871},
+          {"code": "EPH", "description": "Enclosed Porch", "gross_area": 378, "living_area": 0},
+          {"code": "UBM", "description": "Basement, Unfinished", "gross_area": 1283, "living_area": 0},
+          {"code": "WDK", "description": "Wood Deck", "gross_area": 32, "living_area": 0}
+        ],
+        "total_gross_area": 5210,
+        "total_living_area": 3227
+      },
+
+      "land": {
+        "use_code": "1050",
+        "description": "THREE FAM",
+        "zone": "RG-5",
+        "neighborhood": "102",
+        "alt_land_appr": "No",
+        "size_sqft": 3004,
+        "depth": 531,
+        "assessed_value": "$61,500"
+      },
+
+      "extra_features": [],
+
+      "outbuildings": [],
+
+      "sales_history": [
+        {
+          "owner": "ARRES 359 SHIRLEY STREET LLC",
+          "price": "$730,000",
+          "certificate": null,
+          "book_page": "71438/0136",
+          "instrument": "00",
+          "date": "12/19/2024"
+        },
+        {
+          "owner": "INTELLECTUAL PROPERTIES LLC",
+          "price": "$310,000",
+          "certificate": null,
+          "book_page": "51841/0125",
+          "instrument": "00",
+          "date": "12/11/2013"
+        },
+        {
+          "owner": "PRECISION CAPITAL LLC",
+          "price": "$260,000",
+          "certificate": null,
+          "book_page": "43282/0150",
+          "instrument": "00",
+          "date": "09/05/2008"
+        },
+        {
+          "owner": "WCD DEVELOPMENT LLC",
+          "price": "$97,500",
+          "certificate": null,
+          "book_page": "42691/0025",
+          "instrument": "1S",
+          "date": "04/14/2008"
+        },
+        {
+          "owner": "AMTRUST BANK",
+          "price": "$85,000",
+          "certificate": null,
+          "book_page": "42030/0292",
+          "instrument": "1L",
+          "date": "11/05/2007"
+        }
+      ],
+
+      "valuation_history": [
+        {"year": 2026, "improvements": "$555,000", "land": "$61,500", "total": "$616,500"},
+        {"year": 2025, "improvements": "$488,200", "land": "$57,800", "total": "$546,000"},
+        {"year": 2024, "improvements": "$450,200", "land": "$57,800", "total": "$508,000"},
+        {"year": 2023, "improvements": "$401,200", "land": "$50,300", "total": "$451,500"}
+      ],
+
+      "photos": [
+        {
+          "type": "building",
+          "url": "https://images.vgsi.com/photos2/WorcesterMAPhotos//\\0174\\807_807_1_1.JPG",
+          "description": "Building Photo"
+        }
+      ],
+
+      "layouts": [
+        {
+          "type": "sketch",
+          "url": "https://images.vgsi.com/photos2/WorcesterMAPhotos//Sketches/807_807.jpg",
+          "description": "Building Layout"
+        }
+      ],
+
+      "map_links": {
+        "vision_gis": "https://gis.vgsi.com/WorcesterMAMap?pid=807",
+        "google": "http://maps.google.com/?q=15 WACHUSETT ST  WORCESTER, MA 01609-2638",
+        "yahoo": "http://maps.yahoo.com/#q=15%20WACHUSETT%20ST%20%20WORCESTER,%20MA%2001609-2638",
+        "bing": "http://www.bing.com/maps/?q=15 WACHUSETT ST  WORCESTER, MA 01609-2638"
+      }
+    }
+  ]
+}
