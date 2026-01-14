@@ -3672,6 +3672,12 @@
             const landDetails = prop.land_details || {};
             const outbuildings = prop.outbuildings || [];
             const extraFeatures = prop.extra_features || [];
+
+            // Store images for lightbox
+            currentPropertyImages = [
+                ...photos.map(p => ({ url: p.url, caption: p.description || p.photo_type || 'Photo' })),
+                ...layouts.map(l => ({ url: l.url, caption: l.description || l.layout_type || 'Layout' }))
+            ];
             const exemptions = prop.exemptions || [];
 
             return `
@@ -3763,7 +3769,7 @@
                     <div class="detail-section-title">Photos (${photos.length})</div>
                     <div class="photos-grid">
                         ${photos.map((p, idx) => `
-                            <div class="photo-item" onclick="openLightbox(${JSON.stringify([...photos, ...layouts].map(item => ({ url: item.url, caption: item.description || item.photo_type || item.layout_type || '' })))}, ${idx})">
+                            <div class="photo-item" data-lightbox-index="${idx}">
                                 <img src="${p.url}" alt="${escapeHtml(p.description || 'Photo')}" onerror="this.parentElement.style.display='none'">
                                 <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${escapeHtml(p.description || p.photo_type || '')}</div>
                             </div>
@@ -3777,7 +3783,7 @@
                     <div class="detail-section-title">Layouts / Sketches (${layouts.length})</div>
                     <div class="photos-grid">
                         ${layouts.map((l, idx) => `
-                            <div class="photo-item" onclick="openLightbox(${JSON.stringify([...photos, ...layouts].map(item => ({ url: item.url, caption: item.description || item.photo_type || item.layout_type || '' })))}, ${photos.length + idx})">
+                            <div class="photo-item" data-lightbox-index="${photos.length + idx}">
                                 <img src="${l.url}" alt="${escapeHtml(l.description || 'Layout')}" onerror="this.parentElement.style.display='none'" style="max-width: 100%; height: auto;">
                                 <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${escapeHtml(l.description || l.layout_type || '')}</div>
                             </div>
@@ -4226,10 +4232,12 @@
         // Lightbox state
         let lightboxImages = [];
         let lightboxCurrentIndex = 0;
+        let currentPropertyImages = []; // Stores images for current property modal
 
         // Open Lightbox
-        function openLightbox(images, startIndex = 0) {
-            lightboxImages = images;
+        function openLightbox(startIndex = 0) {
+            if (currentPropertyImages.length === 0) return;
+            lightboxImages = currentPropertyImages;
             lightboxCurrentIndex = startIndex;
             updateLightboxImage();
             document.getElementById('lightboxOverlay').classList.add('active');
@@ -4255,6 +4263,7 @@
         // Update Lightbox Image
         function updateLightboxImage() {
             const img = lightboxImages[lightboxCurrentIndex];
+            if (!img) return;
             document.getElementById('lightboxImage').src = img.url;
             document.getElementById('lightboxCaption').textContent = img.caption || '';
             document.getElementById('lightboxCounter').textContent = `${lightboxCurrentIndex + 1} / ${lightboxImages.length}`;
@@ -4273,6 +4282,15 @@
             if (e.key === 'Escape') closeLightbox();
             if (e.key === 'ArrowLeft') navigateLightbox(e, -1);
             if (e.key === 'ArrowRight') navigateLightbox(e, 1);
+        });
+
+        // Event delegation for photo-item clicks
+        document.addEventListener('click', (e) => {
+            const photoItem = e.target.closest('.photo-item[data-lightbox-index]');
+            if (photoItem) {
+                const index = parseInt(photoItem.dataset.lightboxIndex, 10);
+                openLightbox(index);
+            }
         });
 
         // Close Lead Panel (mobile)
