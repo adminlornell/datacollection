@@ -1032,8 +1032,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
             justify-content: center;
             align-items: center;
             cursor: zoom-out;
@@ -1080,7 +1080,7 @@
             align-items: center;
             justify-content: center;
             transition: background 0.2s;
-            z-index: 1001;
+            z-index: 10000;
         }
 
         .lightbox-close:hover {
@@ -3769,7 +3769,7 @@
                     <div class="detail-section-title">Photos (${photos.length})</div>
                     <div class="photos-grid">
                         ${photos.map((p, idx) => `
-                            <div class="photo-item" data-lightbox-index="${idx}">
+                            <div class="photo-item" onclick="openLightbox(${idx})">
                                 <img src="${p.url}" alt="${escapeHtml(p.description || 'Photo')}" onerror="this.parentElement.style.display='none'">
                                 <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${escapeHtml(p.description || p.photo_type || '')}</div>
                             </div>
@@ -3783,7 +3783,7 @@
                     <div class="detail-section-title">Layouts / Sketches (${layouts.length})</div>
                     <div class="photos-grid">
                         ${layouts.map((l, idx) => `
-                            <div class="photo-item" data-lightbox-index="${photos.length + idx}">
+                            <div class="photo-item" onclick="openLightbox(${photos.length + idx})">
                                 <img src="${l.url}" alt="${escapeHtml(l.description || 'Layout')}" onerror="this.parentElement.style.display='none'" style="max-width: 100%; height: auto;">
                                 <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${escapeHtml(l.description || l.layout_type || '')}</div>
                             </div>
