@@ -3677,6 +3677,7 @@
                 ...photos.map(p => ({ url: p.url, caption: p.description || p.photo_type || 'Photo' })),
                 ...layouts.map(l => ({ url: l.url, caption: l.description || l.layout_type || 'Layout' }))
             ];
+            console.log('Property images stored for lightbox:', currentPropertyImages.length, 'total images');
 
             return `
                 <!-- Business Certificates Section (loaded dynamically) -->
@@ -5447,12 +5448,23 @@
 
         // Lightbox functionality
         function openLightbox(startIndex = 0) {
-            if (currentPropertyImages.length === 0) return;
+            console.log('openLightbox called with index:', startIndex);
+            console.log('currentPropertyImages:', currentPropertyImages);
+            if (currentPropertyImages.length === 0) {
+                console.warn('No images available for lightbox');
+                return;
+            }
+            const overlay = document.getElementById('lightboxOverlay');
+            if (!overlay) {
+                console.error('Lightbox overlay element not found!');
+                return;
+            }
             lightboxImages = currentPropertyImages;
             lightboxCurrentIndex = startIndex;
             updateLightboxImage();
-            document.getElementById('lightboxOverlay').classList.add('active');
+            overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
+            console.log('Lightbox opened successfully');
         }
 
         function closeLightbox(event) {
