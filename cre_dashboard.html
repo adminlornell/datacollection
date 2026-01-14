@@ -1024,6 +1024,108 @@
             object-fit: cover;
         }
 
+        /* Lightbox / Fullscreen Image Viewer */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .lightbox-overlay.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .lightbox-content img {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-caption {
+            text-align: center;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            z-index: 1001;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .lightbox-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .lightbox-nav.prev {
+            left: 20px;
+        }
+
+        .lightbox-nav.next {
+            right: 20px;
+        }
+
+        .lightbox-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
         /* Toast Notifications */
         .toast-container {
             position: fixed;
@@ -2334,6 +2436,18 @@
                 <button class="btn btn-primary" onclick="applyAdvancedSearch()">🔍 Search</button>
             </div>
         </div>
+    </div>
+
+    <!-- Lightbox / Fullscreen Image Viewer -->
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <button class="lightbox-nav prev" onclick="navigateLightbox(event, -1)">&lsaquo;</button>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <img id="lightboxImage" src="" alt="">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
+        </div>
+        <button class="lightbox-nav next" onclick="navigateLightbox(event, 1)">&rsaquo;</button>
+        <div class="lightbox-counter" id="lightboxCounter"></div>
     </div>
 
     <!-- Toast Container -->
@@ -3648,9 +3762,9 @@
                 <div class="detail-section">
                     <div class="detail-section-title">Photos (${photos.length})</div>
                     <div class="photos-grid">
-                        ${photos.map(p => `
-                            <div class="photo-item">
-                                <img src="${p.url}" alt="${escapeHtml(p.description || 'Photo')}" onerror="this.style.display='none'">
+                        ${photos.map((p, idx) => `
+                            <div class="photo-item" onclick="openLightbox(${JSON.stringify([...photos, ...layouts].map(item => ({ url: item.url, caption: item.description || item.photo_type || item.layout_type || '' })))}, ${idx})">
+                                <img src="${p.url}" alt="${escapeHtml(p.description || 'Photo')}" onerror="this.parentElement.style.display='none'">
                                 <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${escapeHtml(p.description || p.photo_type || '')}</div>
                             </div>
                         `).join('')}
@@ -3662,9 +3776,9 @@
                 <div class="detail-section">
                     <div class="detail-section-title">Layouts / Sketches (${layouts.length})</div>
                     <div class="photos-grid">
-                        ${layouts.map(l => `
-                            <div class="photo-item">
-                                <img src="${l.url}" alt="${escapeHtml(l.description || 'Layout')}" onerror="this.style.display='none'" style="max-width: 100%; height: auto;">
+                        ${layouts.map((l, idx) => `
+                            <div class="photo-item" onclick="openLightbox(${JSON.stringify([...photos, ...layouts].map(item => ({ url: item.url, caption: item.description || item.photo_type || item.layout_type || '' })))}, ${photos.length + idx})">
+                                <img src="${l.url}" alt="${escapeHtml(l.description || 'Layout')}" onerror="this.parentElement.style.display='none'" style="max-width: 100%; height: auto;">
                                 <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">${escapeHtml(l.description || l.layout_type || '')}</div>
                             </div>
                         `).join('')}
@@ -4108,6 +4222,58 @@
                 previousView = null;
             }
         }
+
+        // Lightbox state
+        let lightboxImages = [];
+        let lightboxCurrentIndex = 0;
+
+        // Open Lightbox
+        function openLightbox(images, startIndex = 0) {
+            lightboxImages = images;
+            lightboxCurrentIndex = startIndex;
+            updateLightboxImage();
+            document.getElementById('lightboxOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Lightbox
+        function closeLightbox(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('lightboxOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Navigate Lightbox
+        function navigateLightbox(event, direction) {
+            event.stopPropagation();
+            lightboxCurrentIndex += direction;
+            if (lightboxCurrentIndex < 0) lightboxCurrentIndex = lightboxImages.length - 1;
+            if (lightboxCurrentIndex >= lightboxImages.length) lightboxCurrentIndex = 0;
+            updateLightboxImage();
+        }
+
+        // Update Lightbox Image
+        function updateLightboxImage() {
+            const img = lightboxImages[lightboxCurrentIndex];
+            document.getElementById('lightboxImage').src = img.url;
+            document.getElementById('lightboxCaption').textContent = img.caption || '';
+            document.getElementById('lightboxCounter').textContent = `${lightboxCurrentIndex + 1} / ${lightboxImages.length}`;
+
+            // Show/hide navigation if only one image
+            const navButtons = document.querySelectorAll('.lightbox-nav');
+            navButtons.forEach(btn => btn.style.display = lightboxImages.length > 1 ? 'flex' : 'none');
+            document.getElementById('lightboxCounter').style.display = lightboxImages.length > 1 ? 'block' : 'none';
+        }
+
+        // Keyboard navigation for lightbox
+        document.addEventListener('keydown', (e) => {
+            const overlay = document.getElementById('lightboxOverlay');
+            if (!overlay.classList.contains('active')) return;
+
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') navigateLightbox(e, -1);
+            if (e.key === 'ArrowRight') navigateLightbox(e, 1);
+        });
 
         // Close Lead Panel (mobile)
         function closeLeadPanel() {
