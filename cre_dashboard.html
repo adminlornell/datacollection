@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Worcester CRE Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         * {
             margin: 0;
@@ -2375,6 +2376,11 @@
         let searchSuggestionsVisible = false;
         let businessCertParcelIds = []; // Cache of parcel IDs with business certificates
 
+        // Fuzzy search state
+        let searchCache = []; // Cached properties for fuzzy search
+        let fuseInstance = null; // Fuse.js instance
+        let searchCacheLoaded = false;
+
         // Certificate View State
         let certCurrentPage = 1;
         const certPageSize = 50;
@@ -2413,6 +2419,9 @@
             await loadBusinessCertCount();
             await loadProperties();
             await updateTabCounts();
+
+            // Pre-load search cache for fuzzy search (non-blocking)
+            loadSearchCache();
 
             // Warn before leaving page with unsaved changes
             window.addEventListener('beforeunload', (e) => {
@@ -4324,25 +4333,79 @@
         function showSearchSuggestions(query) {
             const container = document.getElementById('searchSuggestions');
             const resultsDiv = document.getElementById('searchResults');
-            
-            // Show live search results
+
+            // Show live search results using fuzzy search
             searchPropertiesLive(query).then(results => {
                 if (results.length > 0) {
-                    resultsDiv.innerHTML = `
-                        <div class="search-suggestion-title">Matching Properties (${results.length})</div>
-                        ${results.slice(0, 5).map(prop => `
-                            <div class="search-suggestion-item" onclick="selectSearchResult('${prop.parcel_id}')">
-                                <span class="search-suggestion-icon">🏠</span>
-                                <span class="search-suggestion-text">
-                                    <div class="search-suggestion-main">${highlightMatch(prop.location || 'N/A', query)}</div>
-                                    <div class="search-suggestion-sub">${highlightMatch(prop.owner_name || '', query)} • ${prop.total_assessed_value ? '$' + formatNumber(prop.total_assessed_value) : 'N/A'}</div>
-                                </span>
-                            </div>
-                        `).join('')}
-                        ${results.length > 5 ? `<div class="search-suggestion-item" onclick="hideSearchSuggestions(); loadProperties();"><span class="search-suggestion-icon">➡️</span><span class="search-suggestion-text"><div class="search-suggestion-main">View all ${results.length} results...</div></span></div>` : ''}
-                    `;
+                    const suggestionItems = results.slice(0, 5).map(prop => {
+                        const locationHtml = highlightMatch(prop.location || 'N/A', query, prop._fuseMatches);
+                        const ownerHtml = highlightMatch(prop.owner_name || '', query, prop._fuseMatches);
+                        const valueText = prop.total_assessed_value ? '$' + formatNumber(prop.total_assessed_value) : 'N/A';
+
+                        const item = document.createElement('div');
+                        item.className = 'search-suggestion-item';
+                        item.onclick = () => selectSearchResult(prop.parcel_id);
+
+                        const icon = document.createElement('span');
+                        icon.className = 'search-suggestion-icon';
+                        icon.textContent = '\u{1F3E0}';
+
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'search-suggestion-text';
+
+                        const mainDiv = document.createElement('div');
+                        mainDiv.className = 'search-suggestion-main';
+                        mainDiv.innerHTML = locationHtml; // Already escaped in highlightMatch
+
+                        const subDiv = document.createElement('div');
+                        subDiv.className = 'search-suggestion-sub';
+                        subDiv.innerHTML = ownerHtml + ' \u2022 ' + escapeHtml(valueText); // Already escaped
+
+                        textSpan.appendChild(mainDiv);
+                        textSpan.appendChild(subDiv);
+                        item.appendChild(icon);
+                        item.appendChild(textSpan);
+
+                        return item;
+                    });
+
+                    // Clear and rebuild results
+                    resultsDiv.textContent = '';
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'search-suggestion-title';
+                    titleDiv.textContent = 'Matching Properties (' + results.length + (results.length >= 20 ? '+' : '') + ')';
+                    resultsDiv.appendChild(titleDiv);
+
+                    suggestionItems.forEach(item => resultsDiv.appendChild(item));
+
+                    if (results.length > 5) {
+                        const viewAllItem = document.createElement('div');
+                        viewAllItem.className = 'search-suggestion-item';
+                        viewAllItem.onclick = () => { hideSearchSuggestions(); loadProperties(); };
+
+                        const viewAllIcon = document.createElement('span');
+                        viewAllIcon.className = 'search-suggestion-icon';
+                        viewAllIcon.textContent = '\u27A1\uFE0F';
+
+                        const viewAllText = document.createElement('span');
+                        viewAllText.className = 'search-suggestion-text';
+
+                        const viewAllMain = document.createElement('div');
+                        viewAllMain.className = 'search-suggestion-main';
+                        viewAllMain.textContent = 'View all ' + results.length + ' results...';
+
+                        viewAllText.appendChild(viewAllMain);
+                        viewAllItem.appendChild(viewAllIcon);
+                        viewAllItem.appendChild(viewAllText);
+                        resultsDiv.appendChild(viewAllItem);
+                    }
                 } else {
-                    resultsDiv.innerHTML = `<div class="search-suggestion-title">No matching properties found</div>`;
+                    resultsDiv.textContent = '';
+                    const noResultsDiv = document.createElement('div');
+                    noResultsDiv.className = 'search-suggestion-title';
+                    noResultsDiv.textContent = 'No matching properties found';
+                    resultsDiv.appendChild(noResultsDiv);
                 }
             });
             
@@ -4351,15 +4414,70 @@
             document.getElementById('quickSearches').style.display = 'none';
         }
 
-        // Search properties live for suggestions
+        // Load search cache for fuzzy search
+        async function loadSearchCache() {
+            if (searchCacheLoaded) return;
+
+            try {
+                console.log('Loading search cache for fuzzy search...');
+                const { data, error } = await db
+                    .from('worcester_data_collection')
+                    .select('parcel_id, location, owner_name, total_assessed_value, neighborhood')
+                    .limit(10000); // Cache up to 10k properties for fuzzy search
+
+                if (error) throw error;
+
+                searchCache = data || [];
+
+                // Initialize Fuse.js with fuzzy search options
+                fuseInstance = new Fuse(searchCache, {
+                    keys: [
+                        { name: 'location', weight: 0.4 },
+                        { name: 'owner_name', weight: 0.3 },
+                        { name: 'parcel_id', weight: 0.2 },
+                        { name: 'neighborhood', weight: 0.1 }
+                    ],
+                    threshold: 0.4, // 0.0 = exact match, 1.0 = match anything
+                    distance: 100, // How far to search for fuzzy matches
+                    includeScore: true,
+                    includeMatches: true,
+                    minMatchCharLength: 2,
+                    ignoreLocation: true, // Search entire string, not just beginning
+                    useExtendedSearch: true
+                });
+
+                searchCacheLoaded = true;
+                console.log(`Search cache loaded with ${searchCache.length} properties`);
+            } catch (e) {
+                console.error('Error loading search cache:', e);
+            }
+        }
+
+        // Search properties live for suggestions using fuzzy search
         async function searchPropertiesLive(query) {
             try {
+                // Ensure cache is loaded
+                if (!searchCacheLoaded) {
+                    await loadSearchCache();
+                }
+
+                // Use Fuse.js for fuzzy search if available
+                if (fuseInstance && query.length >= 2) {
+                    const results = fuseInstance.search(query);
+                    // Return top 20 matches, sorted by score (lower is better)
+                    return results.slice(0, 20).map(result => ({
+                        ...result.item,
+                        _fuseMatches: result.matches // Store match info for highlighting
+                    }));
+                }
+
+                // Fallback to database search if cache not loaded
                 const { data, error } = await db
                     .from('worcester_data_collection')
                     .select('parcel_id, location, owner_name, total_assessed_value')
                     .or(`location.ilike.%${query}%,owner_name.ilike.%${query}%,parcel_id.ilike.%${query}%,neighborhood.ilike.%${query}%`)
                     .limit(20);
-                
+
                 return data || [];
             } catch (e) {
                 console.error('Error searching:', e);
@@ -4367,9 +4485,34 @@
             }
         }
 
-        // Highlight matching text
-        function highlightMatch(text, query) {
-            if (!text || !query) return escapeHtml(text || '');
+        // Highlight matching text with fuzzy match support
+        function highlightMatch(text, query, fuseMatches = null) {
+            if (!text) return escapeHtml('');
+
+            const escapedText = escapeHtml(text);
+
+            // If we have Fuse.js match indices, use them for precise highlighting
+            if (fuseMatches) {
+                const matchForField = fuseMatches.find(m => m.value === text);
+                if (matchForField && matchForField.indices) {
+                    let result = '';
+                    let lastIndex = 0;
+
+                    // Sort indices and merge overlapping ones
+                    const indices = matchForField.indices.sort((a, b) => a[0] - b[0]);
+
+                    for (const [start, end] of indices) {
+                        result += escapedText.slice(lastIndex, start);
+                        result += `<span class="search-highlight">${escapedText.slice(start, end + 1)}</span>`;
+                        lastIndex = end + 1;
+                    }
+                    result += escapedText.slice(lastIndex);
+                    return result;
+                }
+            }
+
+            // Fallback to simple regex matching
+            if (!query) return escapedText;
             const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
             return escapeHtml(text).replace(regex, '<span class="search-highlight">$1</span>');
         }
