@@ -4,6 +4,7 @@ from .street_scraper import StreetScraper
 from .property_scraper import PropertyScraper
 from .detail_scraper import PropertyDetailScraper
 from .media_downloader import MediaDownloader
+from .supabase_scraper import SupabaseScraper
 
 __all__ = [
     'BaseScraper',
@@ -11,4 +12,5 @@ __all__ = [
     'PropertyScraper',
     'PropertyDetailScraper',
     'MediaDownloader',
+    'SupabaseScraper',
 ]

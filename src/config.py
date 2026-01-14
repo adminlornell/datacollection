@@ -9,8 +9,12 @@ BASE_URL = "https://gis.vgsi.com/worcesterma"
 STREETS_URL = f"{BASE_URL}/Streets.aspx"
 PARCEL_URL = f"{BASE_URL}/Parcel.aspx"
 
-# Database
+# Database (SQLite - local)
 DATABASE_PATH = os.getenv("DATABASE_PATH", "worcester_properties.db")
+
+# Supabase Configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://cxcgeumhfjvnuibxnbob.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")  # Set via environment variable
 
 # Storage paths
 DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
