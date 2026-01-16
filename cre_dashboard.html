@@ -3681,12 +3681,6 @@
             const exemptions = prop.exemptions || [];
 
             return `
-                <!-- Business Certificates Section (loaded dynamically) -->
-                <div id="businessCertSection" style="display: none;"></div>
-
-                <!-- Building Permits Section (loaded dynamically) -->
-                <div id="buildingPermitsSection" style="display: none;"></div>
-
                 <div class="detail-section">
                     <div class="detail-section-title">Basic Information</div>
                     <div class="detail-grid">
@@ -3990,6 +3984,12 @@
                     </table>
                 </div>
                 ` : ''}
+
+                <!-- Business Certificates Section (loaded dynamically) -->
+                <div id="businessCertSection" style="display: none;"></div>
+
+                <!-- Building Permits Section (loaded dynamically) -->
+                <div id="buildingPermitsSection" style="display: none;"></div>
 
                 <div class="detail-section">
                     <div class="detail-section-title">Source</div>
