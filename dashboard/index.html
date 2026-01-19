@@ -5201,6 +5201,10 @@
                 // Temporarily hide the download button
                 if (btn) btn.style.display = 'none';
 
+                // Store original styles and set fixed width for PDF capture
+                const originalContainerStyle = analysisContainer.style.cssText;
+                analysisContainer.style.cssText = originalContainerStyle + '; width: 650px; max-width: 650px; overflow: visible; box-sizing: border-box; padding: 0 10px;';
+
                 // Add a temporary header before the container
                 const header = document.createElement('div');
                 header.id = 'pdf-temp-header';
@@ -5343,6 +5347,8 @@
                 if (photosSection) photosSection.remove();
                 if (layoutsSection) layoutsSection.remove();
                 if (btn) btn.style.display = '';
+                // Restore original container styles
+                analysisContainer.style.cssText = originalContainerStyle;
 
             } catch (error) {
                 console.error('Error generating report:', error);
@@ -5354,6 +5360,9 @@
                 if (tempPhotos) tempPhotos.remove();
                 const tempLayouts = document.getElementById('pdf-temp-layouts');
                 if (tempLayouts) tempLayouts.remove();
+                // Restore original container styles
+                const container = document.getElementById('aiAnalysisContainer');
+                if (container) container.style.cssText = '';
             } finally {
                 if (btn) {
                     btn.style.display = '';
