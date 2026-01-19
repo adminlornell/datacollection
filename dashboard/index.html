@@ -5203,7 +5203,17 @@
 
                 // Store original styles and set fixed width for PDF capture
                 const originalContainerStyle = analysisContainer.style.cssText;
-                analysisContainer.style.cssText = originalContainerStyle + '; width: 650px; max-width: 650px; overflow: visible; box-sizing: border-box; padding: 0 10px;';
+                analysisContainer.style.cssText = originalContainerStyle + '; width: 100%; max-width: 650px; overflow: visible; box-sizing: border-box; color: #1f2937;';
+
+                // Ensure text elements have explicit colors for PDF rendering
+                analysisContainer.querySelectorAll('p, li, span, div').forEach(el => {
+                    if (!el.style.color) {
+                        el.style.color = '#4b5563';
+                    }
+                });
+                analysisContainer.querySelectorAll('h1, h2, h3, h4, h5, h6, strong').forEach(el => {
+                    el.style.color = '#1f2937';
+                });
 
                 // Add a temporary header before the container
                 const header = document.createElement('div');
