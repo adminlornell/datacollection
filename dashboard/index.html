@@ -5220,7 +5220,12 @@
 
                 // Add photos section - try captured version first, fallback to direct images
                 let photosSection = null;
-                const photos = prop.photos || [];
+                // Filter out layouts from photos array (some data has layouts mixed in)
+                const allPhotos = prop.photos || [];
+                const photos = allPhotos.filter(p => {
+                    const desc = (p.description || p.photo_type || '').toLowerCase();
+                    return !desc.includes('layout') && !desc.includes('sketch');
+                });
                 const layouts = prop.layouts || [];
 
                 if (photosCanvasData) {
