@@ -5318,22 +5318,21 @@
 
                 // PDF options
                 const opt = {
-                    margin: [15, 10, 15, 10],
+                    margin: [15, 15, 15, 15],
                     filename: `${(prop.location || 'Property').replace(/[^a-zA-Z0-9\s]/g, '').trim()} Analysis.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: '#ffffff',
-                        windowWidth: 800
+                        backgroundColor: '#ffffff'
                     },
                     jsPDF: {
                         unit: 'mm',
                         format: 'a4',
                         orientation: 'portrait'
                     },
-                    pagebreak: { mode: 'css', before: '.page-break-before', after: '.page-break-after', avoid: ['img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: ['img', 'tr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }
                 };
 
                 // Capture the actual visible container
