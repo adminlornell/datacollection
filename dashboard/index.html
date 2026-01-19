@@ -5319,7 +5319,7 @@
                 // PDF options
                 const opt = {
                     margin: [10, 10, 10, 10],
-                    filename: `Property_Analysis_${prop.parcel_id || 'Report'}.pdf`,
+                    filename: `${(prop.location || 'Property').replace(/[^a-zA-Z0-9\s]/g, '').trim()} Analysis.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
