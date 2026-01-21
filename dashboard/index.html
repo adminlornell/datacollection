@@ -2006,8 +2006,12 @@
                 <div class="filter-chips">
                     <button class="filter-chip" data-filter="all" onclick="setFilter('all')">All</button>
                     <button class="filter-chip" data-filter="leads" onclick="setFilter('leads')">My Leads <span class="count" id="filterLeadsCount">0</span></button>
+                    <button class="filter-chip" data-filter="new" onclick="setFilter('new')">🆕 New <span class="count" id="filterNewCount">0</span></button>
+                    <button class="filter-chip" data-filter="contacted" onclick="setFilter('contacted')">📞 Contacted <span class="count" id="filterContactedCount">0</span></button>
+                    <button class="filter-chip" data-filter="interested" onclick="setFilter('interested')">⭐ Interested <span class="count" id="filterInterestedCount">0</span></button>
                     <button class="filter-chip" data-filter="hot" onclick="setFilter('hot')">🔥 Hot <span class="count" id="filterHotCount">0</span></button>
-                    <button class="filter-chip" data-filter="follow_up" onclick="setFilter('follow_up')">Follow-up <span class="count" id="filterFollowUpCount">0</span></button>
+                    <button class="filter-chip" data-filter="follow_up" onclick="setFilter('follow_up')">📅 Follow-up <span class="count" id="filterFollowUpCount">0</span></button>
+                    <button class="filter-chip" data-filter="not_interested" onclick="setFilter('not_interested')">❌ Not Int. <span class="count" id="filterNotInterestedCount">0</span></button>
                     <button class="filter-chip" data-filter="long_term" onclick="setFilter('long_term')">⏳ 20+ Years <span class="count" id="filterLongTermCount">0</span></button>
                     <button class="filter-chip" data-filter="has_business" onclick="setFilter('has_business')">🏪 Has Business <span class="count" id="filterBusinessCount">0</span></button>
                 </div>
@@ -2623,7 +2627,11 @@
 
                 if (leads) {
                     const activeLeads = leads.filter(l => !['closed', 'not_interested'].includes(l.status)).length;
+                    const newLeads = leads.filter(l => l.status === 'new').length;
+                    const contactedLeads = leads.filter(l => l.status === 'contacted').length;
+                    const interestedLeads = leads.filter(l => l.status === 'interested').length;
                     const hotLeads = leads.filter(l => l.status === 'hot').length;
+                    const notInterestedLeads = leads.filter(l => l.status === 'not_interested').length;
                     const today = new Date().toISOString().split('T')[0];
                     const followUps = leads.filter(l => l.follow_up_date === today).length;
 
@@ -2631,8 +2639,12 @@
                     document.getElementById('statHotLeads').textContent = hotLeads;
                     document.getElementById('statFollowUps').textContent = followUps;
                     document.getElementById('filterLeadsCount').textContent = leads.length;
+                    document.getElementById('filterNewCount').textContent = newLeads;
+                    document.getElementById('filterContactedCount').textContent = contactedLeads;
+                    document.getElementById('filterInterestedCount').textContent = interestedLeads;
                     document.getElementById('filterHotCount').textContent = hotLeads;
                     document.getElementById('filterFollowUpCount').textContent = leads.filter(l => l.follow_up_date).length;
+                    document.getElementById('filterNotInterestedCount').textContent = notInterestedLeads;
 
                     // Cache leads by parcel_id
                     leadsCache = {};
@@ -2756,6 +2768,39 @@
                         updatePagination(0);
                         return;
                     }
+                } else if (currentFilter === 'new') {
+                    const newParcelIds = Object.entries(leadsCache)
+                        .filter(([_, lead]) => lead.status === 'new')
+                        .map(([id, _]) => id);
+                    if (newParcelIds.length > 0) {
+                        query = query.in('parcel_id', newParcelIds);
+                    } else {
+                        showEmptyState('No new leads yet.');
+                        updatePagination(0);
+                        return;
+                    }
+                } else if (currentFilter === 'contacted') {
+                    const contactedParcelIds = Object.entries(leadsCache)
+                        .filter(([_, lead]) => lead.status === 'contacted')
+                        .map(([id, _]) => id);
+                    if (contactedParcelIds.length > 0) {
+                        query = query.in('parcel_id', contactedParcelIds);
+                    } else {
+                        showEmptyState('No contacted leads yet.');
+                        updatePagination(0);
+                        return;
+                    }
+                } else if (currentFilter === 'interested') {
+                    const interestedParcelIds = Object.entries(leadsCache)
+                        .filter(([_, lead]) => lead.status === 'interested')
+                        .map(([id, _]) => id);
+                    if (interestedParcelIds.length > 0) {
+                        query = query.in('parcel_id', interestedParcelIds);
+                    } else {
+                        showEmptyState('No interested leads yet.');
+                        updatePagination(0);
+                        return;
+                    }
                 } else if (currentFilter === 'hot') {
                     const hotParcelIds = Object.entries(leadsCache)
                         .filter(([_, lead]) => lead.status === 'hot')
@@ -2764,6 +2809,17 @@
                         query = query.in('parcel_id', hotParcelIds);
                     } else {
                         showEmptyState('No hot leads yet.');
+                        updatePagination(0);
+                        return;
+                    }
+                } else if (currentFilter === 'not_interested') {
+                    const notInterestedParcelIds = Object.entries(leadsCache)
+                        .filter(([_, lead]) => lead.status === 'not_interested')
+                        .map(([id, _]) => id);
+                    if (notInterestedParcelIds.length > 0) {
+                        query = query.in('parcel_id', notInterestedParcelIds);
+                    } else {
+                        showEmptyState('No not interested leads.');
                         updatePagination(0);
                         return;
                     }
