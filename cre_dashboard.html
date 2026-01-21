@@ -2470,7 +2470,7 @@
         <div class="stat-item">
             <span class="stat-label">Active Leads</span>
             <span class="stat-value highlight" id="statActiveLeads">0</span>
-            <button onclick="resetAllLeads()" style="font-size: 10px; padding: 2px 6px; margin-top: 4px; background: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer;" title="Delete all leads">Reset All</button>
+            <!-- <button onclick="resetAllLeads()" style="font-size: 10px; padding: 2px 6px; margin-top: 4px; background: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer;" title="Delete all leads">Reset All</button> -->
         </div>
         <div class="stat-item">
             <span class="stat-label">Hot Leads</span>
@@ -3659,16 +3659,17 @@
             resetLeadForm(parcelId);
         }
 
+        /*
         // Reset ALL Leads - deletes all lead data
         async function resetAllLeads() {
             const leadCount = Object.keys(leadsCache).length;
-            
+
             if (leadCount === 0) {
                 showToast('No leads to reset', 'info');
                 return;
             }
 
-            if (!confirm(`⚠️ DELETE ALL ${leadCount} LEADS?\n\nThis will permanently remove all lead data including:\n- All statuses\n- All notes\n- All contact information\n- All follow-up dates\n\nThis action cannot be undone!`)) {
+            if (!confirm(`DELETE ALL ${leadCount} LEADS?\n\nThis will permanently remove all lead data including:\n- All statuses\n- All notes\n- All contact information\n- All follow-up dates\n\nThis action cannot be undone!`)) {
                 return;
             }
 
@@ -3694,21 +3695,17 @@
                 await loadProperties();
 
                 // Clear lead panel
-                document.getElementById('leadPanelContent').innerHTML = `
-                    <div class="lead-panel-empty">
-                        <div class="lead-panel-empty-icon">📋</div>
-                        <p>All leads have been cleared</p>
-                    </div>
-                `;
+                document.getElementById('leadPanelContent').textContent = 'All leads have been cleared';
 
                 selectedProperty = null;
 
-                showToast(`✓ All ${leadCount} leads have been deleted`, 'success');
+                showToast(`All ${leadCount} leads have been deleted`, 'success');
             } catch (e) {
                 console.error('Error resetting all leads:', e);
                 showToast('Error resetting leads: ' + e.message, 'error');
             }
         }
+        */
 
         // Reset Lead Form - clears all fields to defaults
         async function resetLeadForm(parcelId) {
