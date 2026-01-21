@@ -20,6 +20,9 @@ python-dotenv==1.0.0
 # Data export
 pandas==2.1.4
 
+# Coordinate conversion
+pyproj>=3.6.0
+
 # Supabase
 supabase==2.10.0
 

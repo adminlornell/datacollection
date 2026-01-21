@@ -4074,8 +4074,8 @@
                 title.textContent = prop.location || `Parcel ${parcelId}`;
                 body.innerHTML = renderPropertyDetails(prop);
 
-                // Initialize the property map
-                initPropertyModalMap(prop.location);
+                // Initialize the property map (use stored coordinates if available)
+                initPropertyModalMap(prop.location, prop.ai_latitude, prop.ai_longitude);
 
                 // Load business certificates asynchronously
                 loadBusinessCertificates(prop.location);
@@ -4746,8 +4746,8 @@
             }
         }
 
-        // Initialize Property Modal Map with geocoding
-        async function initPropertyModalMap(address) {
+        // Initialize Property Modal Map with stored coordinates or geocoding fallback
+        async function initPropertyModalMap(address, storedLat = null, storedLng = null) {
             const mapContainer = document.getElementById('property-modal-map');
             const statusEl = document.getElementById('property-modal-map-status');
             const googleMapsBtn = document.getElementById('open-google-maps-btn');
@@ -4763,7 +4763,7 @@
                 propertyModalMapInstance = null;
             }
 
-            if (!address) {
+            if (!address && !storedLat) {
                 if (statusEl) statusEl.textContent = 'No address available for map';
                 return;
             }
@@ -4772,20 +4772,31 @@
             if (statusEl) statusEl.textContent = 'Loading map...';
 
             try {
-                // Geocode the address using Nominatim
-                const searchAddress = `${address}, Worcester, MA`;
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, {
-                    headers: { 'User-Agent': 'WorcesterCREDashboard/1.0' }
-                });
-                const results = await response.json();
+                let lat, lng;
+                let coordinateSource = '';
 
-                if (!results || results.length === 0) {
-                    if (statusEl) statusEl.textContent = 'Could not locate address on map';
-                    return;
+                // Use stored coordinates if available (from Address_Points.csv)
+                if (storedLat && storedLng) {
+                    lat = parseFloat(storedLat);
+                    lng = parseFloat(storedLng);
+                    coordinateSource = 'stored';
+                } else {
+                    // Fall back to Nominatim geocoding
+                    const searchAddress = `${address}, Worcester, MA`;
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`, {
+                        headers: { 'User-Agent': 'WorcesterCREDashboard/1.0' }
+                    });
+                    const results = await response.json();
+
+                    if (!results || results.length === 0) {
+                        if (statusEl) statusEl.textContent = 'Could not locate address on map';
+                        return;
+                    }
+
+                    lat = parseFloat(results[0].lat);
+                    lng = parseFloat(results[0].lon);
+                    coordinateSource = 'geocoded';
                 }
-
-                const lat = parseFloat(results[0].lat);
-                const lng = parseFloat(results[0].lon);
 
                 // Create map
                 propertyModalMapInstance = L.map('property-modal-map').setView([lat, lng], 17);
@@ -4812,7 +4823,8 @@
 
                 // Store coordinates and show Google Maps button
                 propertyModalCoordinates = { lat, lng };
-                if (statusEl) statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                const sourceLabel = coordinateSource === 'stored' ? '' : ' (geocoded)';
+                if (statusEl) statusEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}${sourceLabel}`;
                 if (googleMapsBtn) googleMapsBtn.style.display = 'inline-block';
 
             } catch (e) {
