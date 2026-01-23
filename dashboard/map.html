@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worcester Property Map</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --commercial: #c41e3a;
+            --residential: #1e40af;
+            --mixed: #7c3aed;
+            --industrial: #64748b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: var(--gray-900);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 56px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: var(--gray-300);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 56px);
+            margin-top: 56px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 360px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 36px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .filter-section {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 6px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .stats-row {
+            padding: 12px 16px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        .stats-row strong {
+            color: var(--gray-900);
+        }
+
+        /* Property List */
+        .property-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .property-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .property-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .property-card.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .property-address {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .property-owner {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-bottom: 8px;
+        }
+
+        .property-details {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+
+        .property-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .property-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .badge-commercial {
+            background: rgba(196, 30, 58, 0.1);
+            color: #c41e3a;
+        }
+
+        .badge-retail {
+            background: rgba(232, 93, 4, 0.1);
+            color: #e85d04;
+        }
+
+        .badge-industrial {
+            background: rgba(71, 85, 105, 0.1);
+            color: #475569;
+        }
+
+        .badge-multifamily {
+            background: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+        }
+
+        .badge-mixed {
+            background: rgba(8, 145, 178, 0.1);
+            color: #0891b2;
+        }
+
+        .badge-residential {
+            background: rgba(30, 64, 175, 0.1);
+            color: #1e40af;
+        }
+
+        .badge-other {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--industrial);
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Diamond Marker Styles */
+        .diamond-marker {
+            width: 28px;
+            height: 35px;
+            position: relative;
+            cursor: pointer;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .diamond-marker svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Cluster Styles */
+        .marker-cluster {
+            background-color: rgba(196, 30, 58, 0.6);
+        }
+
+        .marker-cluster div {
+            background-color: rgba(196, 30, 58, 0.9);
+        }
+
+        .marker-cluster-small {
+            background-color: rgba(37, 99, 235, 0.6);
+        }
+
+        .marker-cluster-small div {
+            background-color: rgba(37, 99, 235, 0.9);
+        }
+
+        .marker-cluster-medium {
+            background-color: rgba(196, 30, 58, 0.6);
+        }
+
+        .marker-cluster-medium div {
+            background-color: rgba(196, 30, 58, 0.9);
+        }
+
+        .marker-cluster-large {
+            background-color: rgba(139, 0, 0, 0.6);
+        }
+
+        .marker-cluster-large div {
+            background-color: rgba(139, 0, 0, 0.9);
+        }
+
+        /* Custom Popup */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 0;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            min-width: 280px;
+        }
+
+        .popup-content {
+            padding: 16px;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .popup-address {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--gray-900);
+        }
+
+        .popup-parcel {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+
+        .popup-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .popup-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .popup-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-detail-label {
+            color: var(--gray-500);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .popup-detail-value {
+            color: var(--gray-900);
+            font-weight: 500;
+        }
+
+        .popup-actions {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 8px;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .popup-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .popup-btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .popup-btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .popup-btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        /* Legend */
+        .map-legend {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 500;
+            font-size: 12px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .legend-diamond {
+            width: 16px;
+            height: 20px;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 600;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -360px;
+                top: 56px;
+                bottom: 0;
+                z-index: 900;
+                transition: left 0.3s;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 72px;
+            left: 16px;
+            z-index: 800;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--gray-500);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 2L2 7v15h20V7L12 2zm0 2.5L19 9v10H5V9l7-4.5z"/>
+                </svg>
+            </div>
+            Worcester CRE
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a href="map.html" class="nav-link active">Map View</a>
+        </div>
+    </nav>
+
+    <!-- Mobile Toggle -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="search-box">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search address, owner, parcel...">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <button class="filter-chip" data-filter="cre" onclick="setTypeFilter('cre')">CRE Focus</button>
+                <button class="filter-chip active" data-filter="all" onclick="setTypeFilter('all')">All</button>
+                <button class="filter-chip" data-filter="commercial" onclick="setTypeFilter('commercial')">Commercial</button>
+                <button class="filter-chip" data-filter="retail" onclick="setTypeFilter('retail')">Retail</button>
+                <button class="filter-chip" data-filter="industrial" onclick="setTypeFilter('industrial')">Industrial</button>
+                <button class="filter-chip" data-filter="multifamily" onclick="setTypeFilter('multifamily')">Multi-Family</button>
+                <button class="filter-chip" data-filter="residential" onclick="setTypeFilter('residential')">Residential</button>
+            </div>
+
+            <div class="stats-row">
+                <span>Showing <strong id="visibleCount">0</strong> properties</span>
+                <span id="loadingStatus"></span>
+            </div>
+
+            <div class="property-list" id="propertyList">
+                <!-- Properties loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="map-legend">
+                <div class="legend-title">Property Types</div>
+                <div class="legend-item">
+                    <svg class="legend-diamond" viewBox="0 0 28 35">
+                        <path d="M14 0 L28 14 L14 35 L0 14 Z" fill="#c41e3a"/>
+                    </svg>
+                    <span>Commercial</span>
+                </div>
+                <div class="legend-item">
+                    <svg class="legend-diamond" viewBox="0 0 28 35">
+                        <path d="M14 0 L28 14 L14 35 L0 14 Z" fill="#e85d04"/>
+                    </svg>
+                    <span>Retail</span>
+                </div>
+                <div class="legend-item">
+                    <svg class="legend-diamond" viewBox="0 0 28 35">
+                        <path d="M14 0 L28 14 L14 35 L0 14 Z" fill="#475569"/>
+                    </svg>
+                    <span>Industrial</span>
+                </div>
+                <div class="legend-item">
+                    <svg class="legend-diamond" viewBox="0 0 28 35">
+                        <path d="M14 0 L28 14 L14 35 L0 14 Z" fill="#7c3aed"/>
+                    </svg>
+                    <span>Multi-Family</span>
+                </div>
+                <div class="legend-item">
+                    <svg class="legend-diamond" viewBox="0 0 28 35">
+                        <path d="M14 0 L28 14 L14 35 L0 14 Z" fill="#0891b2"/>
+                    </svg>
+                    <span>Mixed Use</span>
+                </div>
+                <div class="legend-item">
+                    <svg class="legend-diamond" viewBox="0 0 28 35">
+                        <path d="M14 0 L28 14 L14 35 L0 14 Z" fill="#1e40af"/>
+                    </svg>
+                    <span>Residential</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://cxcgeumhfjvnuibxnbob.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4Y2dldW1oZmp2bnVpYnhuYm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxOTc5MTYsImV4cCI6MjA3NDc3MzkxNn0.5p6YdLSEF54r-LVOPFhD4OpehMXx6K1q8RPWm3XKeS8';
+
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // State
+        let map;
+        let markers = new L.MarkerClusterGroup({
+            maxClusterRadius: 50,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                if (count >= 100) size = 'large';
+                else if (count >= 10) size = 'medium';
+
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size,
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+        let allProperties = [];
+        let filteredProperties = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let selectedProperty = null;
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize map
+        function initMap() {
+            // Worcester, MA coordinates
+            map = L.map('map').setView([42.2626, -71.8023], 13);
+
+            // Add OpenStreetMap tiles (light theme)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(map);
+
+            map.addLayer(markers);
+        }
+
+        // Classify property into CRE category based on property_type and use_description
+        function classifyProperty(property) {
+            const propType = (property.property_type || '').toLowerCase();
+            const useDesc = (property.use_description || '').toLowerCase();
+
+            // Industrial FIRST (warehouses, manufacturing, factories) - check use_description before property_type
+            if (useDesc.includes('warehouse') || useDesc.includes('industrial') ||
+                useDesc.includes('manufact') || useDesc.includes('factory') ||
+                useDesc.includes('storage') || useDesc.includes('whse') ||
+                useDesc.includes('whses') || useDesc.includes('dockyards') ||
+                propType.includes('industrial')) {
+                return 'industrial';
+            }
+
+            // Retail (stores, restaurants, shopping, auto services)
+            if (useDesc.includes('retail') || useDesc.includes('store') ||
+                useDesc.includes('shop') || useDesc.includes('restaurant') ||
+                useDesc.includes('food') || useDesc.includes('gas') ||
+                useDesc.includes('auto deal') || useDesc.includes('mall') ||
+                useDesc.includes('shopping') || useDesc.includes('supermkt') ||
+                useDesc.includes('supermarket') || useDesc.includes('auto v s') ||
+                useDesc.includes('auto repr') || useDesc.includes('auto sales')) {
+                return 'retail';
+            }
+
+            // Commercial (offices, general commercial) - after industrial/retail
+            if (propType.includes('commercial') || useDesc.includes('office') ||
+                useDesc.includes('bank') || useDesc.includes('medical') ||
+                useDesc.includes('hotel') || useDesc.includes('motel')) {
+                return 'commercial';
+            }
+
+            // Multi-Family (apartments, 2+ units)
+            if (useDesc.includes('apt') || useDesc.includes('two fam') ||
+                useDesc.includes('three fam') || useDesc.includes('multi') ||
+                useDesc.includes('2 fam') || useDesc.includes('3 fam') ||
+                useDesc.includes('4 fam') || useDesc.includes('condo') ||
+                useDesc.includes('rooming') || propType.includes('multi')) {
+                return 'multifamily';
+            }
+
+            // Mixed Use
+            if (propType.includes('mixed')) {
+                return 'mixed';
+            }
+
+            // Single Family Residential
+            if (propType.includes('residential') || useDesc.includes('single') ||
+                useDesc.includes('sfr') || useDesc.includes('res ')) {
+                return 'residential';
+            }
+
+            return 'other';
+        }
+
+        // Color mapping for property categories
+        const categoryColors = {
+            commercial: '#c41e3a',   // Red
+            retail: '#e85d04',       // Orange
+            industrial: '#475569',   // Slate gray
+            multifamily: '#7c3aed',  // Purple
+            mixed: '#0891b2',        // Cyan
+            residential: '#1e40af', // Blue
+            other: '#64748b'         // Gray
+        };
+
+        // Create diamond marker icon
+        function createDiamondIcon(property, isSelected = false) {
+            const category = classifyProperty(property);
+            const color = categoryColors[category] || '#64748b';
+
+            // Make CRE properties slightly larger
+            const isCRE = ['commercial', 'retail', 'industrial', 'multifamily'].includes(category);
+            const size = isCRE ? 32 : 26;
+            const sizeH = isCRE ? 40 : 33;
+
+            const strokeWidth = isSelected ? 3 : 2;
+            const strokeColor = isSelected ? '#000' : '#fff';
+
+            return L.divIcon({
+                className: 'diamond-marker',
+                html: '<svg viewBox="0 0 28 35"><path d="M14 2 L26 14 L14 33 L2 14 Z" fill="' + color + '" stroke="' + strokeColor + '" stroke-width="' + strokeWidth + '"/></svg>',
+                iconSize: [size, sizeH],
+                iconAnchor: [size/2, sizeH],
+                popupAnchor: [0, -sizeH]
+            });
+        }
+
+        // Get property type color class for badges
+        function getPropertyTypeClass(property) {
+            const category = classifyProperty(property);
+            return 'badge-' + category;
+        }
+
+        // Get display label for property category
+        function getCategoryLabel(property) {
+            const category = classifyProperty(property);
+            const labels = {
+                commercial: 'Commercial',
+                retail: 'Retail',
+                industrial: 'Industrial',
+                multifamily: 'Multi-Family',
+                mixed: 'Mixed Use',
+                residential: 'Residential',
+                other: 'Other'
+            };
+            return labels[category] || 'Other';
+        }
+
+        // Format currency
+        function formatCurrency(value) {
+            if (!value) return 'N/A';
+            return '$' + value.toLocaleString();
+        }
+
+        // Format number
+        function formatNumber(value) {
+            if (!value) return 'N/A';
+            return value.toLocaleString();
+        }
+
+        // Create popup content using DOM methods (XSS safe)
+        function createPopupElement(property) {
+            const container = document.createElement('div');
+            container.className = 'popup-content';
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'popup-header';
+
+            const leftDiv = document.createElement('div');
+            const address = document.createElement('div');
+            address.className = 'popup-address';
+            address.textContent = property.location || 'Unknown Address';
+            const parcel = document.createElement('div');
+            parcel.className = 'popup-parcel';
+            parcel.textContent = property.parcel_id || '';
+            leftDiv.appendChild(address);
+            leftDiv.appendChild(parcel);
+
+            const value = document.createElement('div');
+            value.className = 'popup-value';
+            value.textContent = formatCurrency(property.total_assessed_value);
+
+            header.appendChild(leftDiv);
+            header.appendChild(value);
+            container.appendChild(header);
+
+            // Type badge with category
+            const badge = document.createElement('span');
+            badge.className = 'property-type-badge ' + getPropertyTypeClass(property);
+            badge.textContent = getCategoryLabel(property);
+            container.appendChild(badge);
+
+            // Use description if different from category
+            if (property.use_description) {
+                const useDesc = document.createElement('div');
+                useDesc.style.cssText = 'font-size: 11px; color: #6b7280; margin-top: 4px;';
+                useDesc.textContent = property.use_description;
+                container.appendChild(useDesc);
+            }
+
+            // Details grid
+            const details = document.createElement('div');
+            details.className = 'popup-details';
+
+            const detailItems = [
+                { label: 'Owner', value: property.owner_name || 'N/A' },
+                { label: 'Year Built', value: property.year_built || 'N/A' },
+                { label: 'Living Area', value: formatNumber(property.living_area_sqft) + ' sqft' },
+                { label: 'Ownership', value: property.ownership_years ? property.ownership_years + ' years' : 'N/A' }
+            ];
+
+            detailItems.forEach(item => {
+                const detail = document.createElement('div');
+                detail.className = 'popup-detail';
+                const label = document.createElement('span');
+                label.className = 'popup-detail-label';
+                label.textContent = item.label;
+                const val = document.createElement('span');
+                val.className = 'popup-detail-value';
+                val.textContent = item.value;
+                detail.appendChild(label);
+                detail.appendChild(val);
+                details.appendChild(detail);
+            });
+            container.appendChild(details);
+
+            // Actions
+            const actions = document.createElement('div');
+            actions.className = 'popup-actions';
+
+            const viewBtn = document.createElement('button');
+            viewBtn.className = 'popup-btn popup-btn-primary';
+            viewBtn.textContent = 'View Details';
+            viewBtn.onclick = () => openInDashboard(property.parcel_id);
+
+            const mapsBtn = document.createElement('button');
+            mapsBtn.className = 'popup-btn popup-btn-secondary';
+            mapsBtn.textContent = 'Google Maps';
+            mapsBtn.onclick = () => openGoogleMaps(property.ai_latitude, property.ai_longitude);
+
+            actions.appendChild(viewBtn);
+            actions.appendChild(mapsBtn);
+            container.appendChild(actions);
+
+            return container;
+        }
+
+        // Open property in main dashboard
+        function openInDashboard(parcelId) {
+            window.open('index.html?search=' + encodeURIComponent(parcelId), '_blank');
+        }
+
+        // Open in Google Maps
+        function openGoogleMaps(lat, lng) {
+            window.open('https://www.google.com/maps?q=' + lat + ',' + lng, '_blank');
+        }
+
+        // Load properties from Supabase using pagination
+        async function loadProperties() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const statusEl = document.getElementById('loadingStatus');
+
+            loadingOverlay.style.display = 'flex';
+            statusEl.textContent = 'Loading...';
+
+            try {
+                // Fetch ALL properties with coordinates using pagination
+                allProperties = [];
+                const batchSize = 1000;
+                let offset = 0;
+                let hasMore = true;
+
+                while (hasMore) {
+                    statusEl.textContent = 'Loading... ' + allProperties.length + ' properties';
+
+                    const { data, error } = await db
+                        .from('worcester_data_collection')
+                        .select('parcel_id, location, owner_name, total_assessed_value, year_built, living_area_sqft, property_type, use_description, neighborhood, ownership_years, ai_latitude, ai_longitude')
+                        .not('ai_latitude', 'is', null)
+                        .not('ai_longitude', 'is', null)
+                        .order('parcel_id', { ascending: true })
+                        .range(offset, offset + batchSize - 1);
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        allProperties = allProperties.concat(data);
+                        offset += batchSize;
+                        hasMore = data.length === batchSize;
+                    } else {
+                        hasMore = false;
+                    }
+                }
+
+                console.log('Loaded ' + allProperties.length + ' properties with coordinates');
+
+                // Debug: count categories
+                const catCounts = {};
+                allProperties.forEach(p => {
+                    const cat = classifyProperty(p);
+                    catCounts[cat] = (catCounts[cat] || 0) + 1;
+                });
+                console.log('Category counts:', catCounts);
+
+                filterAndDisplayProperties();
+                loadingOverlay.style.display = 'none';
+                statusEl.textContent = '';
+
+            } catch (e) {
+                console.error('Error loading properties:', e);
+                loadingOverlay.style.display = 'none';
+                statusEl.textContent = 'Error loading';
+            }
+        }
+
+        // Filter and display properties
+        function filterAndDisplayProperties() {
+            // Apply filters
+            filteredProperties = allProperties.filter(p => {
+                const category = classifyProperty(p);
+
+                // Type filter using classifyProperty
+                if (currentFilter !== 'all') {
+                    // CRE Focus: commercial, retail, industrial, multifamily
+                    if (currentFilter === 'cre') {
+                        if (!['commercial', 'retail', 'industrial', 'multifamily'].includes(category)) {
+                            return false;
+                        }
+                    }
+                    // Individual category filters
+                    else if (currentFilter === 'commercial' && category !== 'commercial') {
+                        return false;
+                    }
+                    else if (currentFilter === 'retail' && category !== 'retail') {
+                        return false;
+                    }
+                    else if (currentFilter === 'industrial' && category !== 'industrial') {
+                        return false;
+                    }
+                    else if (currentFilter === 'multifamily' && category !== 'multifamily') {
+                        return false;
+                    }
+                    else if (currentFilter === 'residential' && category !== 'residential') {
+                        return false;
+                    }
+                }
+
+                // Search filter
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    const matchesAddress = (p.location || '').toLowerCase().includes(query);
+                    const matchesOwner = (p.owner_name || '').toLowerCase().includes(query);
+                    const matchesParcel = (p.parcel_id || '').toLowerCase().includes(query);
+                    const matchesUse = (p.use_description || '').toLowerCase().includes(query);
+                    if (!matchesAddress && !matchesOwner && !matchesParcel && !matchesUse) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort: CRE properties first (commercial, retail, industrial, multifamily)
+            filteredProperties.sort((a, b) => {
+                const catA = classifyProperty(a);
+                const catB = classifyProperty(b);
+                const priority = { commercial: 1, retail: 2, industrial: 3, multifamily: 4, mixed: 5, residential: 6, other: 7 };
+                return (priority[catA] || 99) - (priority[catB] || 99);
+            });
+
+            // Update counts
+            document.getElementById('visibleCount').textContent = filteredProperties.length;
+
+            // Update map markers
+            updateMapMarkers();
+
+            // Update property list
+            updatePropertyList();
+        }
+
+        // Update map markers
+        function updateMapMarkers() {
+            markers.clearLayers();
+
+            filteredProperties.forEach(property => {
+                if (!property.ai_latitude || !property.ai_longitude) return;
+
+                const marker = L.marker(
+                    [property.ai_latitude, property.ai_longitude],
+                    { icon: createDiamondIcon(property) }
+                );
+
+                marker.bindPopup(createPopupElement(property), {
+                    maxWidth: 320,
+                    className: 'property-popup'
+                });
+
+                marker.propertyData = property;
+
+                marker.on('click', () => {
+                    selectProperty(property);
+                });
+
+                markers.addLayer(marker);
+            });
+
+            // Fit bounds if we have properties
+            if (filteredProperties.length > 0) {
+                const bounds = markers.getBounds();
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+        }
+
+        // Update property list in sidebar using safe DOM methods
+        function updatePropertyList() {
+            const container = document.getElementById('propertyList');
+            container.textContent = ''; // Clear safely
+
+            if (filteredProperties.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'empty-state';
+                const icon = document.createElement('div');
+                icon.className = 'empty-state-icon';
+                icon.textContent = '\u{1F3E2}'; // Building emoji
+                const text = document.createElement('p');
+                text.textContent = 'No properties found';
+                empty.appendChild(icon);
+                empty.appendChild(text);
+                container.appendChild(empty);
+                return;
+            }
+
+            // Sort by value descending and limit to first 100 for performance
+            const displayProperties = [...filteredProperties]
+                .sort((a, b) => (b.total_assessed_value || 0) - (a.total_assessed_value || 0))
+                .slice(0, 100);
+
+            displayProperties.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'property-card' + (selectedProperty?.parcel_id === p.parcel_id ? ' selected' : '');
+                card.dataset.parcel = p.parcel_id;
+                card.onclick = () => flyToProperty(p.parcel_id);
+
+                const addressEl = document.createElement('div');
+                addressEl.className = 'property-address';
+                addressEl.textContent = p.location || 'Unknown Address';
+
+                const ownerEl = document.createElement('div');
+                ownerEl.className = 'property-owner';
+                ownerEl.textContent = p.owner_name || 'Unknown Owner';
+
+                const detailsEl = document.createElement('div');
+                detailsEl.className = 'property-details';
+
+                const valueEl = document.createElement('span');
+                valueEl.className = 'property-value';
+                valueEl.textContent = formatCurrency(p.total_assessed_value);
+
+                const yearEl = document.createElement('span');
+                yearEl.textContent = p.year_built || 'N/A';
+
+                const areaEl = document.createElement('span');
+                areaEl.textContent = formatNumber(p.living_area_sqft) + ' sqft';
+
+                detailsEl.appendChild(valueEl);
+                detailsEl.appendChild(yearEl);
+                detailsEl.appendChild(areaEl);
+
+                const badge = document.createElement('span');
+                badge.className = 'property-type-badge ' + getPropertyTypeClass(p);
+                badge.textContent = getCategoryLabel(p);
+
+                card.appendChild(addressEl);
+                card.appendChild(ownerEl);
+                card.appendChild(detailsEl);
+                card.appendChild(badge);
+
+                // Add use description if available
+                if (p.use_description) {
+                    const useEl = document.createElement('div');
+                    useEl.style.cssText = 'font-size: 10px; color: #6b7280; margin-top: 4px;';
+                    useEl.textContent = p.use_description;
+                    card.appendChild(useEl);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        // Select property
+        function selectProperty(property) {
+            selectedProperty = property;
+            updatePropertyList();
+        }
+
+        // Fly to property on map
+        function flyToProperty(parcelId) {
+            const property = filteredProperties.find(p => p.parcel_id === parcelId);
+            if (property && property.ai_latitude && property.ai_longitude) {
+                selectedProperty = property;
+                updatePropertyList();
+
+                // Find the marker
+                let targetMarker = null;
+                markers.eachLayer(layer => {
+                    if (layer.propertyData && layer.propertyData.parcel_id === parcelId) {
+                        targetMarker = layer;
+                    }
+                });
+
+                if (targetMarker) {
+                    // Use zoomToShowLayer to handle cluster expansion, then open popup
+                    markers.zoomToShowLayer(targetMarker, () => {
+                        targetMarker.openPopup();
+                    });
+                } else {
+                    // Fallback: just fly to location
+                    map.flyTo([property.ai_latitude, property.ai_longitude], 17);
+                }
+            }
+        }
+
+        // Set type filter
+        function setTypeFilter(filter) {
+            currentFilter = filter;
+            console.log('Filter set to:', filter, '| Total properties loaded:', allProperties.length);
+
+            // Update UI
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.filter === filter);
+            });
+
+            filterAndDisplayProperties();
+            console.log('Filtered count:', filteredProperties.length);
+        }
+
+        // Toggle sidebar (mobile)
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            initMap();
+            await loadProperties();
+
+            // Search handler
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchQuery = e.target.value.trim();
+                    filterAndDisplayProperties();
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
