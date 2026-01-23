@@ -1,0 +1,100 @@
+/* Property Cards */
+
+.property-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    display: flex;
+    gap: 16px;
+}
+
+.property-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.property-card.selected {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.02);
+}
+
+.property-card.has-lead {
+    border-left: 4px solid var(--success);
+}
+
+.property-card.has-lead.hot {
+    border-left-color: var(--hot);
+}
+
+.property-main {
+    flex: 1;
+}
+
+.property-address {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+}
+
+.property-owner {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin-bottom: 8px;
+}
+
+.property-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--gray-500);
+    flex-wrap: wrap;
+}
+
+.property-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.property-value {
+    text-align: right;
+    min-width: 100px;
+}
+
+.property-value .amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.property-value .label {
+    font-size: 11px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+}
+
+.property-card-with-checkbox {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.property-card-checkbox-area {
+    padding-top: 4px;
+}
+
+/* Has Business Certificate Badge */
+.has-business-cert {
+    background: #3b82f6;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 6px;
+}

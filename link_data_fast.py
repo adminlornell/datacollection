@@ -3,34 +3,14 @@
 Fast linking of business certificates to properties using batch SQL.
 """
 
-import os
-import re
-from dotenv import load_dotenv
-from supabase import create_client
-
-load_dotenv()
-
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY')
-
-
-def normalize_address(addr):
-    """Normalize address for matching."""
-    if not addr:
-        return None
-    addr = addr.upper().strip()
-    addr = ' '.join(addr.split())
-    addr = re.sub(r'\s+(APT|UNIT|STE|SUITE|FL|FLOOR|#)\s*\S*', '', addr)
-    addr = addr.replace(' STREET', ' ST').replace(' AVENUE', ' AVE')
-    addr = addr.replace(' ROAD', ' RD').replace(' DRIVE', ' DR')
-    addr = addr.replace(' LANE', ' LN').replace(' COURT', ' CT')
-    addr = addr.replace(' PLACE', ' PL').replace(' BOULEVARD', ' BLVD')
-    return addr
+# Import from core module
+from src.core import get_supabase_client
+from src.core.utils.address import normalize_address
 
 
 def main():
     print("Connecting to Supabase...", flush=True)
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    supabase = get_supabase_client()
 
     # Load all properties
     print("\nLoading properties...", flush=True)

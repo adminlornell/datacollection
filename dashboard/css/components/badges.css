@@ -1,0 +1,108 @@
+/* Status Badges, Labels */
+
+/* Lead Badge */
+.lead-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 8px;
+}
+
+.lead-badge.new { background: var(--gray-200); color: var(--gray-700); }
+.lead-badge.contacted { background: #dbeafe; color: #1e40af; }
+.lead-badge.interested { background: #d1fae5; color: #065f46; }
+.lead-badge.hot { background: #fee2e2; color: #991b1b; }
+.lead-badge.follow_up { background: #fef3c7; color: #92400e; }
+.lead-badge.not_interested { background: var(--gray-200); color: var(--gray-600); }
+.lead-badge.closed { background: var(--gray-300); color: var(--gray-600); }
+
+/* Table Badge */
+.table-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.table-badge.residential { background: #dbeafe; color: #1e40af; }
+.table-badge.commercial { background: #fef3c7; color: #92400e; }
+.table-badge.mixed { background: #e0e7ff; color: #3730a3; }
+
+/* Business Certificate Badge */
+.business-cert-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #dbeafe;
+    color: #1e40af;
+    gap: 4px;
+}
+
+.business-cert-badge.expired {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Certificate Status Badge */
+.cert-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.cert-status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.cert-status-badge.expired {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Dirty/unsaved changes indicator */
+.dirty-indicator {
+    padding: 8px 12px;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+/* Last saved display */
+.last-saved-display {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #f0fdf4;
+    border: 1px solid #22c55e;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #166534;
+    text-align: center;
+}
+
+/* AI Cached Badge */
+.ai-cached-badge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
