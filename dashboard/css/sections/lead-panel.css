@@ -1,0 +1,112 @@
+/* Lead Management Panel Styles */
+
+/* Lead Panel */
+.lead-panel {
+    background: white;
+    border-left: 1px solid var(--gray-200);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.lead-panel-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lead-panel-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.lead-panel-close {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--gray-500);
+}
+
+@media (max-width: 1200px) {
+    .lead-panel-close { display: block; }
+}
+
+.lead-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.lead-panel-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray-500);
+}
+
+.lead-panel-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+/* Lead Form */
+.lead-form-section {
+    margin-bottom: 24px;
+}
+
+.lead-form-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.lead-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Property Quick Info in Lead Panel */
+.lead-property-info {
+    background: var(--gray-50);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.lead-property-address {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+}
+
+.lead-property-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    font-size: 13px;
+}
+
+.lead-property-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.lead-property-detail .label {
+    color: var(--gray-500);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.lead-property-detail .value {
+    color: var(--gray-900);
+    font-weight: 600;
+}

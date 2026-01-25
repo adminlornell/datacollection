@@ -13,6 +13,8 @@ Usage:
     python main.py --download-only    # Only download photos/layouts
     python main.py --export           # Export data to CSV/JSON
     python main.py --status           # Show scraping progress
+    python main.py --enrich           # Enrich owner info with AI agents
+    python main.py --enrich-parcel X  # Enrich specific parcel
 
 Features:
     - Automatic resume capability
@@ -20,6 +22,7 @@ Features:
     - Rate limiting to be respectful to the server
     - Concurrent media downloads
     - Data export to CSV/JSON
+    - AI-powered owner research (MA SOS, OpenCorporates, SEC EDGAR)
 """
 import asyncio
 import argparse
@@ -281,6 +284,8 @@ Examples:
   python main.py --status           # Check progress
   python main.py --export           # Export to CSV/JSON
   python main.py --no-resume        # Start fresh (ignore previous progress)
+  python main.py --enrich --limit 5 # Enrich 5 company owners
+  python main.py --enrich-parcel 123 --enrich-deep  # Deep research specific parcel
         """
     )
 
@@ -303,6 +308,16 @@ Examples:
     parser.add_argument('--export-format', choices=['csv', 'json', 'both'],
                         default='both', help='Export format (default: both)')
 
+    # Owner enrichment options
+    parser.add_argument('--enrich', action='store_true',
+                        help='Enrich owner information using AI agents')
+    parser.add_argument('--enrich-parcel', type=str,
+                        help='Enrich a specific parcel ID')
+    parser.add_argument('--enrich-deep', action='store_true',
+                        help='Perform deep ownership research (multiple iterations)')
+    parser.add_argument('--llm', type=str, default='openrouter/meta-llama/llama-3.3-70b-instruct:free',
+                        help='LLM model for enrichment (default: openrouter/meta-llama/llama-3.3-70b-instruct:free)')
+
     args = parser.parse_args()
 
     scraper = WorcesterPropertyScraper()
@@ -310,6 +325,34 @@ Examples:
     try:
         if args.status:
             scraper.print_status()
+            return
+
+        if args.enrich or args.enrich_parcel:
+            from src.enrichment import OwnerEnricher
+            enricher = OwnerEnricher(
+                db_path=DATABASE_PATH,
+                llm=args.llm,
+                verbose=True
+            )
+            if args.enrich_parcel:
+                result = enricher.enrich_property(
+                    parcel_id=args.enrich_parcel,
+                    deep=args.enrich_deep
+                )
+                if result:
+                    print("\n" + "="*60)
+                    print("OWNERSHIP RESEARCH RESULT")
+                    print("="*60)
+                    print(result.model_dump_json(indent=2))
+            else:
+                limit = args.limit or 5
+                results = enricher.enrich_batch(
+                    limit=limit,
+                    company_only=True,
+                    deep=args.enrich_deep
+                )
+                report = enricher.generate_report(results)
+                print(report)
             return
 
         if args.export:

@@ -1,0 +1,24 @@
+/* Main CSS - Import all modular CSS files */
+
+/* 1. Variables (must be first for CSS custom properties) */
+@import 'variables.css';
+
+/* 2. Base styles (reset, typography, animations) */
+@import 'base.css';
+
+/* 3. Layout (page structure, grid, containers) */
+@import 'layout.css';
+
+/* 4. Components */
+@import 'components/navigation.css';
+@import 'components/buttons.css';
+@import 'components/forms.css';
+@import 'components/cards.css';
+@import 'components/modal.css';
+@import 'components/badges.css';
+
+/* 5. Sections */
+@import 'sections/property-list.css';
+@import 'sections/lead-panel.css';
+@import 'sections/details.css';
+@import 'sections/ai-analysis.css';
